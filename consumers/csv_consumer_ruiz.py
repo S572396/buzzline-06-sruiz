@@ -1,97 +1,79 @@
-#####################################
-# Import Modules
-#####################################
-
 import os
 import json
+import matplotlib.pyplot as plt
+import pandas as pd
 from kafka import KafkaConsumer
 from dotenv import load_dotenv
-from utils.utils_logger import logger
+from collections import defaultdict
 
-#####################################
-# Load Environment Variables
-#####################################
-
+# Load environment variables
 load_dotenv()
 
-def get_kafka_topic() -> str:
-    """Fetch Kafka topic from environment or use default."""
-    topic = os.getenv("SMOKER_TOPIC", "unknown_topic")
-    logger.info(f"Kafka topic: {topic}")
-    return topic
+# Kafka Configuration
+TOPIC = os.getenv("CSV_TOPIC", "csv_data")
+BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
 
-def get_kafka_bootstrap_servers() -> str:
-    """Fetch Kafka bootstrap servers from environment or use default."""
-    servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
-    logger.info(f"Kafka bootstrap servers: {servers}")
-    return servers
-
-#####################################
-# Message Processing
-#####################################
-
-def process_message(message: dict):
-    """
-    Process incoming Kafka message.
-    
-    Args:
-        message (dict): Incoming Kafka message containing timestamp, temperature, and classification.
-    """
-    temp = message.get("temperature", None)
-    classification = message.get("classification", "Unknown")
-    timestamp = message.get("timestamp", "Unknown")
-    
-    if temp is None:
-        logger.error("Received message without temperature data.")
-        return
-    
-    # Determine additional messages based on temperature
-    additional_message = ""
-    if 70 <= temp <= 75:
-        additional_message = "Its a nice temp."
-    elif temp >= 89:
-        additional_message = "Its getting warmer!"
-    elif temp >100:
-        additional_message = "It's getting hot!"
-    
-    # Log processed message
-    logger.info(f"[{timestamp}] Temperature: {temp}°F - Classification: {classification} {additional_message}")
-
-#####################################
 # Kafka Consumer
-#####################################
+consumer = KafkaConsumer(
+    TOPIC,
+    bootstrap_servers=BOOTSTRAP_SERVERS,
+    value_deserializer=lambda x: json.loads(x.decode("utf-8")),
+    auto_offset_reset="earliest",
+    enable_auto_commit=True
+)
 
-def main():
-    """
-    Main entry point for the Kafka consumer.
-    
-    - Connects to the Kafka topic.
-    - Listens for incoming messages.
-    - Processes each message.
-    """
-    topic = get_kafka_topic()
-    bootstrap_servers = get_kafka_bootstrap_servers()
-    
-    consumer = KafkaConsumer(
-        topic,
-        bootstrap_servers=bootstrap_servers,
-        value_deserializer=lambda x: json.loads(x.decode("utf-8")),
-        auto_offset_reset="earliest",
-        enable_auto_commit=True,
-    )
-    
-    logger.info(f"Listening for messages on topic: {topic}")
-    
-    try:
-        for message in consumer:
-            process_message(message.value)
-    except KeyboardInterrupt:
-        logger.warning("Consumer interrupted by user.")
-    except Exception as e:
-        logger.error(f"Error in Kafka consumer: {e}")
-    finally:
-        consumer.close()
-        logger.info("Kafka consumer closed.")
+# Aggregation Variables
+age_data = defaultdict(list)
+sex_counts = defaultdict(int)
+job_counts = defaultdict(lambda: defaultdict(int))
 
-if __name__ == "__main__":
-    main()
+# Process Messages
+for message in consumer:
+    data = message.value
+    sex = data["sex"]
+    age = data["age"]
+    job = data["job"]
+
+    if age is not None:
+        age_data[sex].append(age)
+    sex_counts[sex] += 1
+    job_counts[sex][job] += 1
+
+# Compute Average Age by Sex
+average_ages = {sex: sum(ages) / len(ages) for sex, ages in age_data.items()}
+
+# Display Results
+df_age = pd.DataFrame(list(average_ages.items()), columns=["Sex", "Average Age"])
+df_sex_counts = pd.DataFrame(list(sex_counts.items()), columns=["Sex", "Count"])
+df_jobs = pd.DataFrame(
+    [(sex, job, count) for sex, jobs in job_counts.items() for job, count in jobs.items()],
+    columns=["Sex", "Job Title", "Count"]
+)
+
+# Plot Age by Sex
+plt.figure(figsize=(10, 5))
+plt.bar(df_age["Sex"], df_age["Average Age"], color=["blue", "pink"])
+plt.xlabel("Sex")
+plt.ylabel("Average Age")
+plt.title("Average Age by Sex")
+plt.show()
+
+# Plot Count by Sex
+plt.figure(figsize=(10, 5))
+plt.bar(df_sex_counts["Sex"], df_sex_counts["Count"], color=["blue", "pink"])
+plt.xlabel("Sex")
+plt.ylabel("Count")
+plt.title("Number of Individuals by Sex")
+plt.show()
+
+# Plot Top 5 Occupations by Sex
+top_jobs = df_jobs.groupby("Sex").apply(lambda x: x.nlargest(5, "Count"))
+top_jobs.pivot(index="Job Title", columns="Sex", values="Count").plot(kind="bar", figsize=(12, 6))
+plt.title("Top 5 Jobs by Sex")
+plt.xlabel("Job Title")
+plt.ylabel("Count")
+plt.legend(title="Sex")
+plt.xticks(rotation=45)
+plt.show()
+
+consumer.close()
