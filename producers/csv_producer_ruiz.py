@@ -1,222 +1,49 @@
-"""
-csv_producer_ruiz.py
-
-Stream numeric data to a Kafka topic.
-
-It is common to transfer csv data as JSON so 
-each field is clearly labeled. 
-
-Includes classification of temperature values:
-- Low (< 225°F)
-- Normal (225°F - 275°F)
-- High (> 275°F)
-"""
-
-#####################################
-# Import Modules
-#####################################
-
-# Import packages from Python Standard Library
 import os
-import sys
-import time  # control message intervals
-import pathlib  # work with file paths
-import csv  # handle CSV data
-import json  # work with JSON data
-from datetime import datetime  # work with timestamps
-
-# Import external packages
+import json
+import pandas as pd
+from kafka import KafkaProducer
 from dotenv import load_dotenv
+from datetime import datetime
 
-# Import functions from local modules
-from utils.utils_producer import (
-    verify_services,
-    create_kafka_producer,
-    create_kafka_topic,
-)
-from utils.utils_logger import logger
-
-#####################################
-# Load Environment Variables
-#####################################
-
+# Load environment variables
 load_dotenv()
 
-#####################################
-# Getter Functions for .env Variables
-#####################################
+# Kafka Configuration
+TOPIC = os.getenv("CSV_TOPIC", "csv_data")
+BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092")
+
+# Kafka Producer
+producer = KafkaProducer(
+    bootstrap_servers=BOOTSTRAP_SERVERS,
+    value_serializer=lambda v: json.dumps(v).encode("utf-8")
+)
+
+csv_file = r"C:\Users\19564\Documents\SandraRuizPro6\buzzline-06-sruiz\data\people1000.csv"
+df = pd.read_csv(csv_file, encoding="utf-8")
 
 
-def get_kafka_topic() -> str:
-    """Fetch Kafka topic from environment or use default."""
-    topic = os.getenv("SMOKER_TOPIC", "unknown_topic")
-    logger.info(f"Kafka topic: {topic}")
-    return topic
 
-
-def get_message_interval() -> int:
-    """Fetch message interval from environment or use default."""
-    interval = int(os.getenv("SMOKER_INTERVAL_SECONDS", 1))
-    logger.info(f"Message interval: {interval} seconds")
-    return interval
-
-
-#####################################
-# Set up Paths
-#####################################
-
-# The parent directory of this file is its folder.
-# Go up one more parent level to get the project root.
-PROJECT_ROOT = pathlib.Path(__file__).parent.parent
-logger.info(f"Project root: {PROJECT_ROOT}")
-
-# Set directory where data is stored
-DATA_FOLDER = PROJECT_ROOT.joinpath("data")
-logger.info(f"Data folder: {DATA_FOLDER}")
-
-# Set the name of the data file
-DATA_FILE = DATA_FOLDER.joinpath("smoker_temps.csv")
-logger.info(f"Data file: {DATA_FILE}")
-
-#####################################
-# Classification Function
-#####################################
-
-
-def classify_temperature(temp: float) -> str:
-    """
-    Classify the temperature into one of three categories.
-
-    Args:
-        temp (float): The temperature value.
-
-    Returns:
-        str: Classification ('Low', 'Normal', or 'High').
-    """
-    if temp < 75:
-        return "Low"
-    elif 70 <= temp <= 79:
-        return "Normal"
-    else:
-        return "High"
-
-
-#####################################
-# Message Generator
-#####################################
-
-
-def generate_messages(file_path: pathlib.Path):
-    """
-    Read from a csv file and yield records one by one, continuously.
-
-    Args:
-        file_path (pathlib.Path): Path to the CSV file.
-
-    Yields:
-        dict: JSON message containing timestamp, temperature, and classification.
-    """
-    while True:
-        try:
-            logger.info(f"Opening data file in read mode: {DATA_FILE}")
-            with open(DATA_FILE, "r") as csv_file:
-                logger.info(f"Reading data from file: {DATA_FILE}")
-
-                csv_reader = csv.DictReader(csv_file)
-                for row in csv_reader:
-                    # Ensure required fields are present
-                    if "temperature" not in row:
-                        logger.error(f"Missing 'temperature' column in row: {row}")
-                        continue
-
-                    # Convert temperature to float
-                    temp_value = float(row["temperature"])
-
-                    # Generate a timestamp
-                    current_timestamp = datetime.utcnow().isoformat()
-
-                    # Classify temperature
-                    classification = classify_temperature(temp_value)
-
-                    # Prepare message
-                    message = {
-                        "timestamp": current_timestamp,
-                        "temperature": temp_value,
-                        "classification": classification,
-                    }
-                    logger.debug(f"Generated message: {message}")
-                    yield message
-        except FileNotFoundError:
-            logger.error(f"File not found: {file_path}. Exiting.")
-            sys.exit(1)
-        except Exception as e:
-            logger.error(f"Unexpected error in message generation: {e}")
-            sys.exit(3)
-
-
-#####################################
-# Define main function for this module.
-#####################################
-
-
-def main():
-    """
-    Main entry point for the producer.
-
-    - Reads the Kafka topic name from an environment variable.
-    - Creates a Kafka producer using the `create_kafka_producer` utility.
-    - Streams classified messages to the Kafka topic.
-    """
-
-    logger.info("START producer.")
-    verify_services()
-
-    # fetch .env content
-    topic = get_kafka_topic()
-    interval_secs = get_message_interval()
-
-    # Verify the data file exists
-    if not DATA_FILE.exists():
-        logger.error(f"Data file not found: {DATA_FILE}. Exiting.")
-        sys.exit(1)
-
-    # Create the Kafka producer
-    producer = create_kafka_producer(
-        value_serializer=lambda x: json.dumps(x).encode("utf-8")
-    )
-    if not producer:
-        logger.error("Failed to create Kafka producer. Exiting...")
-        sys.exit(3)
-
-    # Create topic if it doesn't exist
+# Function to calculate age
+def calculate_age(birth_date):
     try:
-        create_kafka_topic(topic)
-        logger.info(f"Kafka topic '{topic}' is ready.")
-    except Exception as e:
-        logger.error(f"Failed to create or verify topic '{topic}': {e}")
-        sys.exit(1)
-
-    # Generate and send classified messages
-    logger.info(f"Starting message production to topic '{topic}' with classification...")
-    try:
-        for csv_message in generate_messages(DATA_FILE):
-            producer.send(topic, value=csv_message)
-            logger.info(f"Sent message to topic '{topic}': {csv_message}")
-            time.sleep(interval_secs)
-    except KeyboardInterrupt:
-        logger.warning("Producer interrupted by user.")
-    except Exception as e:
-        logger.error(f"Error during message production: {e}")
-    finally:
-        producer.close()
-        logger.info("Kafka producer closed.")
-
-    logger.info("END producer.")
+        birth_year = pd.to_datetime(birth_date, errors="coerce").year
+        return datetime.now().year - birth_year if pd.notna(birth_year) else None
+    except Exception:
+        return None
 
 
-#####################################
-# Conditional Execution
-#####################################
+# Stream Data to Kafka
+for _, row in df.iterrows():
+    message = {
+     message = {
+    "sex": row.get("Sex", "Unknown"),
+    "age": calculate_age(row.get("Date of birth", "")),
+    "job": row.get("Job Title", "Unknown")
+}
 
-if __name__ == "__main__":
-    main()
+    }
+    producer.send(TOPIC, message)
+
+print("CSV data streaming to Kafka...")
+producer.flush()
+producer.close()

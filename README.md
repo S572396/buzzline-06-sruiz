@@ -1,4 +1,6 @@
-# buzzline-03-case
+# buzzline-06-ruiz
+
+## This project will work with 1,000 people data in csv and gather data for a visualizaiton for sex as x and y categories, average age, sex counts,occupation by sex. Will also send emails to people emails on file.
 
 Streaming data does not have to be simple text.
 Many of us are familiar with streaming video content and audio (e.g. music) files. 
