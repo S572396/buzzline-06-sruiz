@@ -77,3 +77,11 @@ plt.xticks(rotation=45)
 plt.show()
 
 consumer.close()
+
+#####################################
+# Conditional Execution
+#####################################
+
+# Ensures this script runs only when executed directly (not when imported as a module).
+if __name__ == "__main__":
+    main()

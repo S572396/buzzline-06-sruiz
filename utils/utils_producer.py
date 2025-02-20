@@ -37,8 +37,8 @@ load_dotenv()
 # Default Configurations
 #####################################
 
-DEFAULT_ZOOKEEPER_ADDRESS = "localhost:2181"
-DEFAULT_KAFKA_BROKER_ADDRESS = "localhost:9092"
+DEFAULT_ZOOKEEPER_ADDRESS = "Localhost:2181"
+DEFAULT_KAFKA_BROKER_ADDRESS = "Localhost:9092"
 
 #####################################
 # Helper Functions
@@ -46,7 +46,7 @@ DEFAULT_KAFKA_BROKER_ADDRESS = "localhost:9092"
 
 def get_kafka_broker_address():
     """Fetch Kafka broker address from environment or use default."""
-    broker_address = os.getenv("KAFKA_BROKER_ADDRESS", "localhost:9092")
+    broker_address = os.getenv("KAFKA_BROKER_ADDRESS", "Localhost:9092")
     logger.info(f"Kafka broker address: {broker_address}")
     return broker_address
 
