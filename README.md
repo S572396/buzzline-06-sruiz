@@ -41,12 +41,12 @@ bin/zookeeper-server-start.sh config/zookeeper.properties
 chmod +x kafka-server-start.sh
 bin/kafka-server-start.sh config/server.properties
 
-## Third Terminal
+## Third Terminal-Run Producer
 1. py -3.11 -m venv .venv
 .venv\Scripts\activate
 2. py -m producers.csv_producer_ruiz
 
-## Fourth Terminal
+## Fourth Terminal-Run Consumer
 1. py -3.11 -m venv .venv
 .venv\Scripts\activate
 2. py -m consumers.csv_consumer_ruiz
@@ -57,63 +57,6 @@ bin/kafka-server-start.sh config/server.properties
 ## I have saved charts in the data folder of the 3 expected bar charts for average age by sex, sex counts, and Top 10 jobs by sex.
 ## Please note when running the consumer the charts do take a bit to come up.I notice you close one and the other will pop up. Then close the seond chart, and the third will come up.
 
-
-
-
-
-
-
-
-
-
-## Task 7. Start a CSV Producer
-
-Follow a similar process to start the csv producer. 
-You will need to:
-1. Open a new terminal. 
-2. Activate your .venv.
-3. Know the command that works on your machine to execute python (e.g. py or python3).
-4. Know how to use the -m (module flag to run your file as a module).
-5. Know the full name of the module you want to run. Hint: Look in the producers folder.
-6. Add my own unique for tempertature classificaton , low , normal, high
-
-py -m producers.csv_producer_ruiz
-
-What did we name the topic used with csv data? 
-Hint: See the producer code and [.env](.env).
-
-## Task 8. Start a CSV Consumer
-
-Follow a similar process to start the csv consumer. 
-You will need to:
-1. Open a new terminal. 
-2. Activate your .venv.
-3. Know the command that works on your machine to execute python (e.g. py or python3).
-4. Know how to use the -m (module flag to run your file as a module).
-5. Know the full name of the module you want to run. Hint: Look in the consumers folder.
-6. Added new messages about the temerature ranges, such as its getting warmer message.
-
-py -m consumers.csv_consumer_ruiz
-
-What did we name the topic used with csv data? 
-Hint: See the consumer code and [.env](.env).
-
-## About the Smart Smoker (CSV Example)
-
-A food stall occurs when the internal temperature of food plateaus or 
-stops rising during slow cooking, typically between 150°F and 170°F. 
-This happens due to evaporative cooling as moisture escapes from the 
-surface of the food. The plateau can last for hours, requiring 
-adjustments like wrapping the food or raising the cooking temperature to 
-overcome it. Cooking should continue until the food reaches the 
-appropriate internal temperature for safe and proper doneness.
-
-The producer simulates a smart food thermometer, sending a temperature 
-reading every 15 seconds. The consumer monitors these messages and 
-maintains a time window of the last 5 readings. 
-If the temperature varies by less than 2 degrees, the consumer alerts 
-the BBQ master that a stall has been detected. This time window helps 
-capture recent trends while filtering out minor fluctuations.
 
 ## Later Work Sessions
 When resuming work on this project:
