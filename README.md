@@ -1,4 +1,5 @@
 # buzzline-06-ruiz
+# by SANDRA RUIZ
 
 ## This project will work with 1,000 people data in csv and gather data for a visualizaitons with bar charts for sex as x and y categories, average age, sex counts,and top 10 occupations by sex.
 
