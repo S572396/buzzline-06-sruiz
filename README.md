@@ -1,15 +1,6 @@
 # buzzline-06-ruiz
 
-## This project will work with 1,000 people data in csv and gather data for a visualizaiton for sex as x and y categories, average age, sex counts,occupation by sex. Will also send emails to people emails on file.
-
-Streaming data does not have to be simple text.
-Many of us are familiar with streaming video content and audio (e.g. music) files. 
-
-Streaming data can be structured (e.g. csv files) or
-semi-structured (e.g. json data). 
-
-We'll work with two different types of data, and so we'll use two different Kafka topic names. 
-See [.env](.env). 
+## This project will work with 1,000 people data in csv and gather data for a visualizaitons with bar charts for sex as x and y categories, average age, sex counts,and top 10 occupations by sex.
 
 
 ## Task 1. Use Tools from Module 1 and 2
@@ -21,7 +12,7 @@ Python 3.11 is required.
 
 Once the tools are installed, copy/fork this project into your GitHub account
 and create your own version of this project to run and experiment with.
-Name it `buzzline-03-yourname` where yourname is something unique to you.
+Name it `buzzline-06-yourname` where yourname is something unique to you.
 Follow the instructions in [FORK-THIS-REPO.md](https://github.com/denisecase/buzzline-01-case/blob/main/docs/FORK-THIS-REPO.md).
     
 
@@ -40,54 +31,38 @@ See instructions at [SETUP-KAFKA.md] to:
 1. Start Zookeeper Service ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-7-start-zookeeper-service-terminal-1))
 2. Start Kafka ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-8-start-kafka-terminal-2))
 
-## Task 5. Start a JSON Producer
+## Fist Terminal with WSL- Zookeeper
+1. cd ~/kafka
+chmod +x zookeeper-server-start.sh
+bin/zookeeper-server-start.sh config/zookeeper.properties
 
-In VS Code, open a terminal.
-Use the commands below to activate .venv, and start the producer. 
+## Second Terminal with WSL- Kafka
+1. cd ~/kafka
+chmod +x kafka-server-start.sh
+bin/kafka-server-start.sh config/server.properties
 
-Windows:
-
-```shell
+## Third Terminal
+1. py -3.11 -m venv .venv
 .venv\Scripts\activate
-py -m producers.json_producer_case
-```
+2. py -m producers.csv_producer_ruiz
 
-Mac/Linux:
-```zsh
-source .venv/bin/activate
-python3 -m producers.json_producer_case
-```
-
-What did we name the topic used with JSON data? 
-Hint: See the producer code and [.env](.env).
-
-Added a msg count to stop at 250 messages
-
-## Task 6. Start a JSON Consumer
-
-Consumers process streaming data in real time.
-
-In VS Code, open a NEW terminal in your root project folder. 
-Use the commands below to activate .venv, and start the consumer. 
-
-Windows:
-```shell
+## Fourth Terminal
+1. py -3.11 -m venv .venv
 .venv\Scripts\activate
-py -m consumers.json_consumer_case
-py -m producers.json_producer_ruiz
-```
-added to stop at 250 messages,changed names and wording
+2. py -m consumers.csv_consumer_ruiz
+3. my terminal said alreay satisfied, if needed add to the virtual environmnet pip install matplotlib.
+4. If gives error for no pyhon exe, can use the following: python.exe -m pip install --upgrade pip
 
-Mac/Linux:
-```zsh
-source .venv/bin/activate
-python3 -m consumers.json_consumer_case
-py -m consumers.json_consumer_ruiz
-```
-Added word counts
+## Results will be in Terminal and project_log.log.
+## I have saved charts in the data folder of the 3 expected bar charts for average age by sex, sex counts, and Top 10 jobs by sex.
+## Please note when running the consumer the charts do take a bit to come up.I notice you close one and the other will pop up. Then close the seond chart, and the third will come up.
 
-What did we name the topic used with JSON data? 
-Hint: See the consumer code and [.env](.env).
+
+
+
+
+
+
 
 
 

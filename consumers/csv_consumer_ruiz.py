@@ -60,8 +60,7 @@ for message in consumer:
     # Increment message counter
     message_count += 1
 
-    # Stop after 5 messages for testing (you can change this limit)
-    if message_count >= 1000:  # Process all messages (remove limit if needed)
+    if message_count >= 1000:  # Process all messages 
         break
 
 # Compute Average Age by Sex
@@ -78,7 +77,7 @@ df_jobs = pd.DataFrame(
 # Log results
 logging.info("\nAverage Age by Sex:\n" + df_age.to_string(index=False))
 logging.info("\nNumber of Individuals by Sex:\n" + df_sex_counts.to_string(index=False))
-logging.info("\nTop 5 Jobs by Sex:\n" + df_jobs.to_string(index=False))
+logging.info("\nTop 10 Jobs by Sex:\n" + df_jobs.to_string(index=False))
 
 # Log total messages consumed
 logging.info(f"Total messages processed: {message_count}")
@@ -90,7 +89,7 @@ plt.bar(df_age["Sex"], df_age["Average Age"], color=["blue", "pink"])
 plt.xlabel("Sex")
 plt.ylabel("Average Age")
 plt.title("Average Age by Sex")
-plt.tight_layout()  # Makes sure labels are not cut off
+plt.tight_layout() 
 plt.show()
 plt.savefig("output_age_by_sex.png")
 
@@ -104,7 +103,7 @@ plt.tight_layout()
 plt.show()
 plt.savefig("output_count_by_sex.png")
 
-# Plot Top 100 Occupations by Sex
+# Plot Top 10 Occupations by Sex
 top_jobs = df_jobs.groupby("Sex").apply(lambda x: x.nlargest(10, "Count"))
 top_jobs.pivot(index="Job Title", columns="Sex", values="Count").plot(kind="bar", figsize=(12, 6))
 plt.title("Top 10 Jobs by Sex")
@@ -112,7 +111,7 @@ plt.xlabel("Job Title")
 plt.ylabel("Count")
 plt.tight_layout()
 plt.show()
-plt.savefig("output_top_10_jobs_by_sex.png")
+plt.savefig("top_10_jobs_by_sex.png")
 
 
 # Close Kafka Consumer
