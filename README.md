@@ -3,7 +3,7 @@
 
 ## This project will work with 1,000 people data in csv and gather data for a visualizaitons with bar charts for sex as x and y categories, average age, sex counts,and top 10 occupations by sex.
 
-
+## Provided form Base Template:
 ## Task 1. Use Tools from Module 1 and 2
 
 Before starting, ensure you have completed the setup tasks in <https://github.com/denisecase/buzzline-01-case> and <https://github.com/denisecase/buzzline-02-case> first. 
@@ -32,6 +32,7 @@ See instructions at [SETUP-KAFKA.md] to:
 1. Start Zookeeper Service ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-7-start-zookeeper-service-terminal-1))
 2. Start Kafka ([link](https://github.com/denisecase/buzzline-02-case/blob/main/docs/SETUP-KAFKA.md#step-8-start-kafka-terminal-2))
 
+## My Instructions:
 ## Fist Terminal with WSL- Zookeeper
 1. cd ~/kafka
 chmod +x zookeeper-server-start.sh
