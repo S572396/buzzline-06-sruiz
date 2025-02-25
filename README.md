@@ -1,7 +1,8 @@
 # buzzline-06-ruiz
+## Project 6-7 Final
 # by SANDRA RUIZ
 
-## This project will work with 1,000 people data in csv and gather data for a visualizaitons with bar charts for sex as x and y categories, average age, sex counts,and top 10 occupations by sex.
+## This project will work with 1,000 people data in csv and gather data for a visualizaitons with bar charts for sex as x and y categories, average age, sex counts,and top 10 occupations by sex. Results will be in logs and in 3 bar charts.
 
 ## Provided form Base Template:
 ## Task 1. Use Tools from Module 1 and 2
@@ -46,13 +47,16 @@ bin/kafka-server-start.sh config/server.properties
 ## Third Terminal-Run Producer
 1. py -3.11 -m venv .venv
 .venv\Scripts\activate
+cd C:\Users\19564\Documents\SandraRuizPro6\buzzline-06-sruiz
 2. py -m producers.csv_producer_ruiz
+3. Will show CSV data streaming to Kafka completed.
 
 ## Fourth Terminal-Run Consumer
 1. py -3.11 -m venv .venv
 .venv\Scripts\activate
-2. py -m consumers.csv_consumer_ruiz
-3. my terminal said alreay satisfied, if needed add to the virtual environmnet pip install matplotlib.
+cd C:\Users\19564\Documents\SandraRuizPro6\buzzline-06-sruiz
+2. py -m consumers.csv_consumer_ruiz  (Will say Total messages processed:1000) and (Done Processing!)
+3. My terminal said alreay satisfied, if needed add to the virtual environmnet pip install matplotlib.
 4. If gives error for no pyhon exe, can use the following: python.exe -m pip install --upgrade pip
 
 ## Results will be in Terminal and project_log.log.
